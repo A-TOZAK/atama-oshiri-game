@@ -628,6 +628,124 @@
     .anim-pop { animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
     .anim-up  { animation: fade-up 0.28s ease both; }
 
+    /* ── モード選択 ── */
+    .mode-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mode-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: clamp(12px, 2.2vh, 18px) 8px;
+      border: 2.5px solid var(--dark);
+      border-radius: 10px;
+      background: #fff;
+      font-family: 'BIZ UDPGothic', sans-serif;
+      font-size: clamp(15px, 2.8vw, 20px);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--dark);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.3;
+    }
+    .mode-btn.active { background: var(--yellow); }
+    .mode-btn:active { transform: translate(3px,3px); box-shadow: none; }
+    .mode-btn small {
+      font-size: clamp(10px, 1.8vw, 13px);
+      font-weight: normal;
+      color: var(--mid);
+    }
+
+    /* ── 文字ピッカー ── */
+    .picker-wrap {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .picker-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+    }
+    .picker-section { display: flex; flex-direction: column; gap: 8px; }
+    .picker-top { display: flex; align-items: center; gap: 10px; }
+    .picker-type-label {
+      font-size: clamp(12px, 2vw, 15px);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .picker-type-label.head { color: var(--orange); }
+    .picker-type-label.tail { color: var(--red); }
+    .picker-preview {
+      width: clamp(44px, 8vw, 56px);
+      height: clamp(44px, 8vw, 56px);
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(26px, 5vw, 36px);
+      line-height: 1;
+      box-shadow: 2px 2px 0 var(--dark);
+      flex-shrink: 0;
+    }
+    .picker-preview.head { background: #FFF6DA; color: var(--orange); }
+    .picker-preview.tail { background: #FFE9E9; color: var(--red); }
+    .picker-preview.empty { background: #F0EBE0; color: #ccc; }
+
+    .kana-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+    .kana-btn {
+      aspect-ratio: 1;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      font-size: clamp(13px, 2.6vmin, 19px);
+      font-family: 'BIZ UDPGothic', sans-serif;
+      cursor: pointer;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .kana-btn:active { transform: scale(0.88); }
+    .kana-btn.sel-head {
+      background: #FFF6DA;
+      border: 2.5px solid var(--orange);
+      color: var(--orange);
+      font-weight: 700;
+      box-shadow: 2px 2px 0 var(--orange);
+    }
+    .kana-btn.sel-tail {
+      background: #FFE9E9;
+      border: 2.5px solid var(--red);
+      color: var(--red);
+      font-weight: 700;
+      box-shadow: 2px 2px 0 var(--red);
+    }
+
+    /* ゲーム画面：固定モード表示帯 */
+    .fixed-badge {
+      width: 100%;
+      background: #fff;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: clamp(12px, 2vw, 15px);
+      color: var(--mid);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .fixed-badge strong { color: var(--dark); font-size: clamp(14px, 2.5vw, 18px); }
+
     /* ── 全画面ボタン（固定・常時表示） ── */
     .fs-btn {
       position: fixed;
@@ -668,6 +786,40 @@
     <div class="game-sub">ことばゲーム 🎯</div>
   </div>
   <div class="setup-inner">
+
+    <div class="box">
+      <div class="box-title">🎮 ゲームのモード</div>
+      <div class="mode-row">
+        <button class="mode-btn active" onclick="selectMode('random')">
+          🎲 ランダム
+          <small>毎回ちがう文字</small>
+        </button>
+        <button class="mode-btn" onclick="selectMode('fixed')">
+          ✏️ 文字をきめる
+          <small>ずっと同じ文字</small>
+        </button>
+      </div>
+
+      <div id="char-picker" class="picker-wrap hidden">
+        <div class="picker-cols">
+          <div class="picker-section">
+            <div class="picker-top">
+              <div class="picker-preview empty" id="head-preview">？</div>
+              <div class="picker-type-label head">あたまの文字</div>
+            </div>
+            <div class="kana-grid" id="head-grid"></div>
+          </div>
+          <div class="picker-section">
+            <div class="picker-top">
+              <div class="picker-preview empty" id="tail-preview">？</div>
+              <div class="picker-type-label tail">おしりの文字</div>
+            </div>
+            <div class="kana-grid" id="tail-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="box">
       <div class="box-title">👥 プレイヤー数を選んでね</div>
       <div class="count-row" id="count-row">
@@ -698,6 +850,7 @@
     <button class="end-btn" onclick="confirmEnd()">ゲーム終了</button>
   </div>
   <div class="score-strip" id="score-strip"></div>
+  <div class="fixed-badge hidden" id="fixed-badge"></div>
   <div class="game-area">
     <div class="game-inner" id="game-area"></div>
   </div>
@@ -755,6 +908,58 @@
     waitTimer: null, cdTimer: null, cdVal: 10
   };
   let playerCount = 4;
+  let gameMode = 'random';
+  let fixedHead = '';
+  let fixedTail = '';
+
+  /* ── モード選択 ── */
+  function selectMode(mode) {
+    gameMode = mode;
+    document.querySelectorAll('.mode-btn').forEach((b, i) => {
+      b.classList.toggle('active', (mode === 'random' && i === 0) || (mode === 'fixed' && i === 1));
+    });
+    const picker = document.getElementById('char-picker');
+    if (mode === 'fixed') {
+      picker.classList.remove('hidden');
+      renderKanaGrids();
+    } else {
+      picker.classList.add('hidden');
+    }
+  }
+
+  function renderKanaGrids() {
+    renderKanaGrid('head-grid', 'head');
+    renderKanaGrid('tail-grid', 'tail');
+  }
+
+  function renderKanaGrid(id, type) {
+    const grid = document.getElementById(id);
+    if (!grid) return;
+    grid.innerHTML = '';
+    KANA.forEach(char => {
+      const btn = document.createElement('button');
+      btn.className = 'kana-btn';
+      btn.textContent = char;
+      if (type === 'head' && char === fixedHead) btn.classList.add('sel-head');
+      if (type === 'tail' && char === fixedTail)  btn.classList.add('sel-tail');
+      btn.onclick = () => selectChar(type, char);
+      grid.appendChild(btn);
+    });
+  }
+
+  function selectChar(type, char) {
+    if (type === 'head') {
+      if (char === fixedTail) { alert('おしりと同じ文字は選べないよ！'); return; }
+      fixedHead = char;
+    } else {
+      if (char === fixedHead) { alert('あたまと同じ文字は選べないよ！'); return; }
+      fixedTail = char;
+    }
+    const prev = document.getElementById(type + '-preview');
+    prev.textContent = char;
+    prev.className = 'picker-preview ' + type;
+    renderKanaGrids();
+  }
 
   function setCount(n) {
     playerCount = n;
@@ -780,6 +985,10 @@
   }
 
   function startGame() {
+    if (gameMode === 'fixed' && (!fixedHead || !fixedTail)) {
+      alert('あたまとおしりの文字を両方えらんでね！');
+      return;
+    }
     S.players = []; S.scores = [];
     for (let i = 0; i < playerCount; i++) {
       const el = document.getElementById(`pi${i}`);
@@ -787,6 +996,14 @@
       S.scores.push(0);
     }
     S.idx = 0; S.round = 1;
+    // 固定モードバッジの表示切替
+    const badge = document.getElementById('fixed-badge');
+    if (gameMode === 'fixed') {
+      badge.innerHTML = `✏️ 固定モード：あたま <strong>${fixedHead}</strong> ／ おしり <strong>${fixedTail}</strong>`;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
     showScreen('game-screen');
     showNextOverlay();
   }
@@ -821,6 +1038,11 @@
   }
 
   function pickChars() {
+    if (gameMode === 'fixed') {
+      S.head = fixedHead;
+      S.tail = fixedTail;
+      return;
+    }
     const h = Math.floor(Math.random() * KANA.length);
     let t;
     do { t = Math.floor(Math.random() * KANA.length); } while (t === h);

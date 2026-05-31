@@ -583,6 +583,17 @@
           <small>タップして文字をとめる</small>
         </button>
       </div>
+      <div class="box-title" style="margin-top:16px;">⏱ 回答時間</div>
+      <div class="mode-row" id="time-row">
+        <button class="mode-btn active" onclick="selectTime('limited')">
+          🕙 10秒
+          <small>カウントダウンあり</small>
+        </button>
+        <button class="mode-btn" onclick="selectTime('unlimited')">
+          ∞ 無制限
+          <small>自分たちでタイミングを決める</small>
+        </button>
+      </div>
     </div>
 
     <div class="box">
@@ -675,13 +686,21 @@
     spinTimer: null
   };
   let playerCount = 4;
-  let gameMode = 'random';
+  let gameMode  = 'random';
+  let timeMode  = 'limited';
 
   /* ── モード選択 ── */
   function selectMode(mode) {
     gameMode = mode;
     document.querySelectorAll('.mode-btn').forEach((b, i) => {
       b.classList.toggle('active', (mode === 'random' && i === 0) || (mode === 'roulette' && i === 1));
+    });
+  }
+
+  function selectTime(mode) {
+    timeMode = mode;
+    document.querySelectorAll('#time-row .mode-btn').forEach((b, i) => {
+      b.classList.toggle('active', (mode === 'limited' && i === 0) || (mode === 'unlimited' && i === 1));
     });
   }
 
@@ -908,8 +927,19 @@
 
   /* ── カウントダウン（共通） ── */
   function startCountdown() {
-    S.cdVal = 10;
     const hint = document.getElementById('hint-area');
+    if (!hint) return;
+
+    if (timeMode === 'unlimited') {
+      hint.innerHTML = `
+        <div class="timer-box anim-up">
+          <div style="font-size:clamp(14px,2.5vw,18px);color:var(--mid);text-align:center;">じっくり考えてね 💭</div>
+          <button class="early-btn" onclick="phaseScore()">採点する ✏️</button>
+        </div>`;
+      return;
+    }
+
+    S.cdVal = 10;
     if (hint) {
       hint.innerHTML = `
         <div class="timer-box anim-up">

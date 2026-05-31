@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>あたまおしりゲーム</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #D63B2A;
+      --yellow: #F5C518;
+      --blue:   #1A56B8;
+      --green:  #2A9D4E;
+      --orange: #E87000;
+      --dark:   #1a1a1a;
+      --mid:    #666;
+      --paper:  #FBF7ED;
+      --white:  #FFFFFF;
+    }
+
+    body {
+      font-family: 'Kosugi Maru', 'Hiragino Maru Gothic ProN', sans-serif;
+      background: var(--paper);
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      min-height: 100vh;
+      color: var(--dark);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── 共通ヘッダー ── */
+    .page-header {
+      background: var(--red);
+      border-bottom: 4px solid var(--dark);
+      padding: 14px 20px 12px;
+      text-align: center;
+    }
+    .game-title {
+      font-size: clamp(26px, 8vw, 44px);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 5px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+    }
+    .game-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 3px;
+      margin-top: 2px;
+    }
+
+    /* ── セットアップ画面 ── */
+    #setup-screen {
+      padding: 20px 16px 48px;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .box {
+      background: var(--white);
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--dark);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .box-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--mid);
+      border-bottom: 2px dashed #ccc;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+
+    .count-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .count-btn {
+      width: 46px; height: 46px;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      background: var(--white);
+      font-size: 19px;
+      font-weight: bold;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--dark);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .count-btn.active { background: var(--yellow); }
+    .count-btn:active { transform: translate(3px,3px); box-shadow: none; }
+
+    .player-inputs { display: flex; flex-direction: column; gap: 10px; }
+    .player-row { display: flex; align-items: center; gap: 10px; }
+    .p-badge {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border: 2.5px solid var(--dark);
+      border-radius: 50%;
+      background: var(--yellow);
+      font-size: 14px; font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .p-input {
+      flex: 1;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #fff;
+      outline: none;
+      box-shadow: 2px 2px 0 var(--dark);
+    }
+    .p-input:focus { border-color: var(--blue); box-shadow: 2px 2px 0 var(--blue); }
+    .p-input::placeholder { color: #bbb; }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      background: var(--red);
+      color: #fff;
+      font-size: 21px;
+      font-family: inherit;
+      font-weight: bold;
+      letter-spacing: 5px;
+      cursor: pointer;
+      box-shadow: 5px 5px 0 var(--dark);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .start-btn:active { transform: translate(5px,5px); box-shadow: none; }
+
+    /* ── ゲーム画面 ── */
+    #game-screen { max-width: 680px; margin: 0 auto; padding-bottom: 48px; }
+
+    .game-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 3px solid var(--dark);
+    }
+    .round-label { font-size: 14px; font-weight: bold; color: var(--mid); }
+    .end-btn {
+      padding: 7px 14px;
+      border: 2px solid var(--red);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--red);
+      font-size: 13px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s, color 0.12s;
+    }
+    .end-btn:active { background: var(--red); color: #fff; }
+
+    /* スコアストリップ */
+    .score-strip {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      overflow-x: auto;
+      background: #EDE8DB;
+      border-bottom: 3px solid var(--dark);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .score-strip::-webkit-scrollbar { display: none; }
+    .sc {
+      flex-shrink: 0;
+      background: #fff;
+      border: 2px solid #bbb;
+      border-radius: 8px;
+      padding: 5px 12px;
+      text-align: center;
+      min-width: 62px;
+    }
+    .sc.active-player {
+      background: var(--yellow);
+      border: 2.5px solid var(--dark);
+      box-shadow: 3px 3px 0 var(--dark);
+    }
+    .sc-name {
+      font-size: 11px;
+      color: var(--mid);
+      white-space: nowrap;
+      max-width: 68px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sc.active-player .sc-name { color: var(--dark); font-weight: bold; }
+    .sc-pts { font-size: 26px; font-weight: 900; color: var(--dark); line-height: 1.1; }
+
+    /* ゲームエリア */
+    .game-area { padding: 18px 14px; }
+
+    .player-banner {
+      background: var(--blue);
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--dark);
+      padding: 12px 20px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .banner-label { font-size: 11px; color: rgba(255,255,255,0.8); letter-spacing: 2px; margin-bottom: 2px; }
+    .banner-name { font-size: clamp(22px, 6vw, 36px); color: #fff; font-weight: bold; }
+
+    /* 文字カード */
+    .chars-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .char-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: clamp(108px, 26vw, 145px);
+      height: clamp(108px, 26vw, 145px);
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+    }
+    .char-card.head-card { background: #FFF6DA; box-shadow: 4px 4px 0 var(--dark); }
+    .char-card.tail-card { background: #FFE9E9; box-shadow: 4px 4px 0 var(--dark); }
+    .char-card.waiting-card { background: #F0EBE0; border-style: dashed; }
+
+    .card-label { font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 3px; }
+    .head-card .card-label { color: var(--orange); }
+    .tail-card .card-label { color: var(--red); }
+    .waiting-card .card-label { color: #bbb; }
+
+    .card-char { font-size: clamp(50px, 12vw, 70px); line-height: 1; }
+    .head-card .card-char { color: var(--orange); }
+    .tail-card .card-char { color: var(--red); }
+    .waiting-card .card-char { color: #ccc; }
+
+    .char-arrow { font-size: 28px; color: #bbb; }
+
+    /* 待機ヒント */
+    .wait-hint {
+      text-align: center;
+      font-size: 15px;
+      color: var(--mid);
+      padding: 8px;
+    }
+    .dots { display: inline-flex; gap: 5px; vertical-align: middle; margin-left: 4px; }
+    .dots span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: currentColor;
+      animation: dot-bounce 1.2s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* タイマー */
+    .timer-box {
+      background: #fff;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--dark);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .timer-ring { position: relative; width: 116px; height: 116px; }
+    .timer-svg { width: 116px; height: 116px; transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: #eee; stroke-width: 9; }
+    .ring-fg {
+      fill: none; stroke-width: 9; stroke-linecap: round;
+      transition: stroke-dashoffset 0.85s linear, stroke 0.4s;
+    }
+    .timer-num {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; font-weight: 900; line-height: 1;
+    }
+    .early-btn {
+      padding: 11px 26px;
+      border: 3px solid var(--dark);
+      border-radius: 8px;
+      background: var(--green);
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--dark);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .early-btn:active { transform: translate(3px,3px); box-shadow: none; }
+
+    /* 採点フェーズ */
+    .score-phase { display: flex; flex-direction: column; gap: 14px; }
+
+    .score-q-box {
+      background: #fff;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--dark);
+      padding: 14px;
+      text-align: center;
+    }
+    .score-q-sub { font-size: 12px; color: var(--mid); margin-bottom: 3px; }
+    .score-q-name { font-size: clamp(20px, 5vw, 30px); font-weight: bold; color: var(--blue); }
+    .score-q-ask { font-size: 13px; color: var(--mid); margin-top: 3px; }
+
+    .mini-chars { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .mini-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 78px; height: 78px;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+    }
+    .mini-card.head-card { background: #FFF6DA; }
+    .mini-card.tail-card { background: #FFE9E9; }
+    .mini-label { font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+    .mini-card.head-card .mini-label { color: var(--orange); }
+    .mini-card.tail-card .mini-label { color: var(--red); }
+    .mini-char { font-size: 32px; line-height: 1; }
+    .mini-card.head-card .mini-char { color: var(--orange); }
+    .mini-card.tail-card .mini-char { color: var(--red); }
+    .mini-arrow { font-size: 22px; color: #bbb; }
+
+    .score-btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .s-btn {
+      height: 70px;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px;
+      box-shadow: 3px 3px 0 var(--dark);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .s-btn:active { transform: translate(3px,3px); box-shadow: none; }
+    .s-btn small { font-size: 11px; font-weight: normal; opacity: 0.75; }
+    .s-btn.pass { background: #F0EBE0; color: var(--mid); }
+    .s-btn.p1 { background: #D4EDDA; color: #155724; }
+    .s-btn.p2 { background: #CCE5FF; color: #004085; }
+    .s-btn.p3 { background: var(--yellow); color: #333; }
+
+    .custom-row { display: flex; gap: 8px; }
+    .custom-input {
+      flex: 1;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 19px;
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+      background: #fff;
+    }
+    .custom-go {
+      padding: 10px 16px;
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--dark);
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .custom-go:active { transform: translate(3px,3px); box-shadow: none; }
+
+    /* ── 次のプレイヤーオーバーレイ ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(251,247,237,0.96);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 14px;
+      z-index: 200;
+    }
+    .overlay.hidden { display: none; }
+    .ov-icon { font-size: 60px; }
+    .ov-label { font-size: 14px; color: var(--mid); letter-spacing: 3px; }
+    .ov-name {
+      font-size: clamp(30px, 8vw, 50px);
+      font-weight: bold;
+      color: var(--blue);
+      text-align: center;
+      padding: 0 24px 8px;
+      border-bottom: 4px solid var(--blue);
+    }
+    .ov-sub { font-size: 17px; color: var(--mid); }
+    .ov-btn {
+      margin-top: 10px;
+      padding: 17px 46px;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      background: var(--red);
+      color: #fff;
+      font-size: 21px;
+      font-family: inherit;
+      font-weight: bold;
+      letter-spacing: 4px;
+      cursor: pointer;
+      box-shadow: 5px 5px 0 var(--dark);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .ov-btn:active { transform: translate(5px,5px); box-shadow: none; }
+
+    /* スコアフラッシュ */
+    .flash-overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .flash-overlay.show { opacity: 1; }
+    .flash-overlay.show.pass-flash { background: rgba(100,100,100,0.3); }
+    .flash-overlay.show.score-flash { background: rgba(42,157,78,0.2); }
+    .flash-bubble {
+      background: #fff;
+      border: 4px solid var(--dark);
+      border-radius: 16px;
+      box-shadow: 6px 6px 0 var(--dark);
+      padding: 18px 44px;
+      font-size: 76px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    /* ── 結果画面 ── */
+    #results-screen { max-width: 560px; margin: 0 auto; padding: 0 16px 52px; }
+    .results-header {
+      background: var(--yellow);
+      border-bottom: 4px solid var(--dark);
+      padding: 18px;
+      text-align: center;
+      font-size: clamp(22px, 6vw, 34px);
+      font-weight: bold;
+      letter-spacing: 3px;
+    }
+
+    .rank-list { display: flex; flex-direction: column; gap: 10px; margin: 18px 0; }
+    .rank-item {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      padding: 13px 16px;
+      box-shadow: 4px 4px 0 var(--dark);
+    }
+    .rank-item.r1 { background: #FFF8D0; }
+    .rank-item.r2 { background: #F5F5F5; }
+    .rank-item.r3 { background: #FFF0E5; }
+    .rank-medal { font-size: 28px; width: 34px; text-align: center; flex-shrink: 0; }
+    .rank-name { flex: 1; font-size: 19px; font-weight: bold; }
+    .rank-pts { font-size: 28px; font-weight: 900; color: var(--red); }
+    .rank-pts-label { font-size: 13px; color: var(--mid); }
+
+    .replay-btn {
+      width: 100%;
+      padding: 17px;
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 19px;
+      font-family: inherit;
+      font-weight: bold;
+      letter-spacing: 4px;
+      cursor: pointer;
+      box-shadow: 5px 5px 0 var(--dark);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .replay-btn:active { transform: translate(5px,5px); box-shadow: none; }
+
+    /* アニメーション */
+    @keyframes pop-in {
+      0%   { transform: scale(0.5); opacity: 0; }
+      70%  { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fade-up {
+      from { transform: translateY(10px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes dot-bounce {
+      0%,80%,100% { opacity: 0.35; transform: translateY(0); }
+      40%          { opacity: 1;    transform: translateY(-5px); }
+    }
+
+    .anim-pop { animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .anim-up  { animation: fade-up 0.28s ease both; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ══ セットアップ ══ -->
+<div id="setup-screen" class="screen active">
+  <div class="page-header">
+    <div class="game-title">あたまおしり</div>
+    <div class="game-sub">ことばゲーム 🎯</div>
+  </div>
+
+  <div style="padding: 18px 16px 40px; max-width: 540px; margin: 0 auto;">
+
+    <div class="box">
+      <div class="box-title">👥 プレイヤー数を選んでね</div>
+      <div class="count-row" id="count-row">
+        <button class="count-btn" onclick="setCount(2)">2</button>
+        <button class="count-btn" onclick="setCount(3)">3</button>
+        <button class="count-btn" onclick="setCount(4)">4</button>
+        <button class="count-btn" onclick="setCount(5)">5</button>
+        <button class="count-btn" onclick="setCount(6)">6</button>
+        <button class="count-btn" onclick="setCount(7)">7</button>
+        <button class="count-btn" onclick="setCount(8)">8</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">✏️ なまえを入力してね</div>
+      <div class="player-inputs" id="player-inputs"></div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">ゲームスタート！</button>
+  </div>
+</div>
+
+<!-- ══ ゲーム ══ -->
+<div id="game-screen" class="screen">
+  <div class="page-header">
+    <div class="game-title" style="font-size: clamp(18px,5vw,28px); letter-spacing:3px;">あたまおしりゲーム</div>
+  </div>
+  <div class="game-topbar">
+    <div class="round-label" id="round-label">ラウンド 1</div>
+    <button class="end-btn" onclick="confirmEnd()">ゲーム終了</button>
+  </div>
+  <div class="score-strip" id="score-strip"></div>
+  <div class="game-area" id="game-area"></div>
+</div>
+
+<!-- ══ 結果 ══ -->
+<div id="results-screen" class="screen">
+  <div class="results-header">🎉 ゲーム結果！</div>
+  <div style="padding: 0 0 0 0;">
+    <div class="rank-list" id="rank-list"></div>
+    <button class="replay-btn" onclick="resetGame()">もう一度あそぶ</button>
+  </div>
+</div>
+
+<!-- ══ 次プレイヤーオーバーレイ ══ -->
+<div class="overlay hidden" id="next-overlay">
+  <div class="ov-icon">🎮</div>
+  <div class="ov-label">つぎのプレイヤー</div>
+  <div class="ov-name" id="ov-name"></div>
+  <div class="ov-sub">の番だよ！</div>
+  <button class="ov-btn" onclick="beginTurn()">スタート！</button>
+</div>
+
+<!-- ══ スコアフラッシュ ══ -->
+<div class="flash-overlay" id="flash-overlay">
+  <div class="flash-bubble" id="flash-num"></div>
+</div>
+
+<script>
+  const KANA = [
+    'あ','い','う','え','お',
+    'か','き','く','け','こ',
+    'さ','し','す','せ','そ',
+    'た','ち','つ','て','と',
+    'な','に','ぬ','ね','の',
+    'は','ひ','ふ','へ','ほ',
+    'ま','み','む','め','も',
+    'や','ゆ','よ',
+    'ら','り','る','れ','ろ',
+    'わ'
+  ];
+  const MEDALS = ['🥇','🥈','🥉'];
+  const CIRC = 2 * Math.PI * 50;
+
+  const S = {
+    players: [], scores: [],
+    idx: 0, round: 1,
+    head: '', tail: '',
+    waitTimer: null, cdTimer: null, cdVal: 10
+  };
+
+  let playerCount = 4;
+
+  /* ── セットアップ ── */
+  function setCount(n) {
+    playerCount = n;
+    document.querySelectorAll('.count-btn').forEach((b, i) => {
+      b.classList.toggle('active', i + 2 === n);
+    });
+    renderInputs();
+  }
+
+  function renderInputs() {
+    const c = document.getElementById('player-inputs');
+    c.innerHTML = '';
+    for (let i = 0; i < playerCount; i++) {
+      const prev = document.getElementById(`pi${i}`);
+      const val = prev ? prev.value : '';
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.innerHTML = `<div class="p-badge">${i+1}</div>
+        <input class="p-input" id="pi${i}" type="text" maxlength="8"
+          placeholder="プレイヤー${i+1}" value="${val}" inputmode="text">`;
+      c.appendChild(row);
+    }
+  }
+
+  function startGame() {
+    S.players = []; S.scores = [];
+    for (let i = 0; i < playerCount; i++) {
+      const el = document.getElementById(`pi${i}`);
+      S.players.push((el && el.value.trim()) || `P${i+1}`);
+      S.scores.push(0);
+    }
+    S.idx = 0; S.round = 1;
+    showScreen('game-screen');
+    showNextOverlay();
+  }
+
+  /* ── 画面切替 ── */
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ── スコアボード ── */
+  function renderScoreboard() {
+    const strip = document.getElementById('score-strip');
+    strip.innerHTML = '';
+    S.players.forEach((name, i) => {
+      const d = document.createElement('div');
+      d.className = 'sc' + (i === S.idx ? ' active-player' : '');
+      d.innerHTML = `<div class="sc-name">${name}</div><div class="sc-pts">${S.scores[i]}</div>`;
+      strip.appendChild(d);
+    });
+    document.getElementById('round-label').textContent = `ラウンド ${S.round}`;
+  }
+
+  /* ── 次プレイヤーオーバーレイ ── */
+  function showNextOverlay() {
+    renderScoreboard();
+    document.getElementById('ov-name').textContent = S.players[S.idx];
+    document.getElementById('next-overlay').classList.remove('hidden');
+  }
+
+  function beginTurn() {
+    document.getElementById('next-overlay').classList.add('hidden');
+    pickChars();
+    phaseHead();
+  }
+
+  /* ── 文字選択 ── */
+  function pickChars() {
+    const h = Math.floor(Math.random() * KANA.length);
+    let t;
+    do { t = Math.floor(Math.random() * KANA.length); } while (t === h);
+    S.head = KANA[h]; S.tail = KANA[t];
+  }
+
+  /* ── スロット演出 ── */
+  function slotSpin(el, finalChar, cb) {
+    let n = 0; const max = 9;
+    const iv = setInterval(() => {
+      if (n >= max) { clearInterval(iv); el.textContent = finalChar; if (cb) cb(); return; }
+      el.textContent = KANA[Math.floor(Math.random() * KANA.length)];
+      n++;
+    }, 65);
+  }
+
+  /* ── フェーズ：あたま表示 ── */
+  function phaseHead() {
+    killTimers();
+    const area = document.getElementById('game-area');
+    area.innerHTML = `
+      <div class="player-banner anim-up">
+        <div class="banner-label">🎮 げんざいのプレイヤー</div>
+        <div class="banner-name">${S.players[S.idx]}</div>
+      </div>
+      <div class="chars-row">
+        <div class="char-card head-card anim-up" id="head-card">
+          <div class="card-label">あたま</div>
+          <div class="card-char" id="head-char">？</div>
+        </div>
+        <div class="char-arrow">→</div>
+        <div class="char-card waiting-card" id="tail-card">
+          <div class="card-label">おしり</div>
+          <div class="card-char">？</div>
+        </div>
+      </div>
+      <div class="wait-hint anim-up" id="hint-area" style="animation-delay:0.1s">
+        おしりを待ってね
+        <span class="dots"><span></span><span></span><span></span></span>
+      </div>`;
+
+    requestAnimationFrame(() => {
+      const el = document.getElementById('head-char');
+      if (el) slotSpin(el, S.head, null);
+    });
+
+    S.waitTimer = setTimeout(phaseTail, 3000);
+  }
+
+  /* ── フェーズ：おしり表示 ── */
+  function phaseTail() {
+    const tailCard = document.getElementById('tail-card');
+    if (!tailCard) return;
+    tailCard.className = 'char-card tail-card anim-pop';
+    tailCard.innerHTML = `<div class="card-label">おしり</div><div class="card-char" id="tail-char">？</div>`;
+    requestAnimationFrame(() => {
+      const el = document.getElementById('tail-char');
+      if (el) slotSpin(el, S.tail, startCountdown);
+    });
+  }
+
+  /* ── カウントダウン ── */
+  function startCountdown() {
+    S.cdVal = 10;
+    const hint = document.getElementById('hint-area');
+    if (hint) {
+      hint.innerHTML = `
+        <div class="timer-box anim-up">
+          <div class="timer-ring">
+            <svg class="timer-svg" viewBox="0 0 110 110">
+              <circle class="ring-bg" cx="55" cy="55" r="50"/>
+              <circle class="ring-fg" id="ring-fg" cx="55" cy="55" r="50"
+                stroke="#2A9D4E"
+                stroke-dasharray="${CIRC}"
+                stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-num" id="cd-num" style="color:#2A9D4E">10</div>
+          </div>
+          <button class="early-btn" onclick="phaseScore()">採点する ⚡</button>
+        </div>`;
+    }
+
+    S.cdTimer = setInterval(() => {
+      S.cdVal--;
+      const numEl = document.getElementById('cd-num');
+      const ringEl = document.getElementById('ring-fg');
+      if (!numEl) { killTimers(); return; }
+
+      const offset = CIRC * (1 - S.cdVal / 10);
+      ringEl.style.strokeDashoffset = offset;
+      numEl.textContent = S.cdVal;
+
+      const col = S.cdVal > 6 ? '#2A9D4E' : S.cdVal > 3 ? '#E87000' : '#D63B2A';
+      ringEl.style.stroke = col;
+      numEl.style.color = col;
+
+      if (S.cdVal <= 0) { killTimers(); phaseScore(); }
+    }, 1000);
+  }
+
+  /* ── フェーズ：採点 ── */
+  function phaseScore() {
+    killTimers();
+    const area = document.getElementById('game-area');
+    area.innerHTML = `
+      <div class="score-phase anim-up">
+        <div class="score-q-box">
+          <div class="score-q-sub">📝 採点タイム</div>
+          <div class="score-q-name">${S.players[S.idx]}</div>
+          <div class="score-q-ask">は答えられた？</div>
+        </div>
+        <div class="mini-chars">
+          <div class="mini-card head-card">
+            <div class="mini-label">あたま</div>
+            <div class="mini-char">${S.head}</div>
+          </div>
+          <div class="mini-arrow">→</div>
+          <div class="mini-card tail-card">
+            <div class="mini-label">おしり</div>
+            <div class="mini-char">${S.tail}</div>
+          </div>
+        </div>
+        <div class="score-btns">
+          <button class="s-btn pass" onclick="giveScore(0)">0点<br><small>パス</small></button>
+          <button class="s-btn p1" onclick="giveScore(1)">+1点</button>
+          <button class="s-btn p2" onclick="giveScore(2)">+2点</button>
+          <button class="s-btn p3" onclick="giveScore(3)">+3点</button>
+        </div>
+        <div class="custom-row">
+          <input class="custom-input" type="number" id="custom-val" placeholder="任意の点数" min="-9" max="99" inputmode="numeric">
+          <button class="custom-go" onclick="giveCustom()">加算する</button>
+        </div>
+      </div>`;
+  }
+
+  /* ── 採点処理 ── */
+  function giveScore(pts) {
+    S.scores[S.idx] += pts;
+    flashScore(pts);
+  }
+
+  function giveCustom() {
+    const v = parseInt(document.getElementById('custom-val').value) || 0;
+    S.scores[S.idx] += v;
+    flashScore(v);
+  }
+
+  function flashScore(pts) {
+    const fo = document.getElementById('flash-overlay');
+    const fn = document.getElementById('flash-num');
+    fn.textContent = pts === 0 ? 'パス' : (pts > 0 ? `+${pts}` : pts);
+    fo.className = 'flash-overlay show ' + (pts === 0 ? 'pass-flash' : 'score-flash');
+    setTimeout(() => {
+      fo.className = 'flash-overlay';
+      nextPlayer();
+    }, 650);
+  }
+
+  /* ── 次のプレイヤー ── */
+  function nextPlayer() {
+    S.idx = (S.idx + 1) % S.players.length;
+    if (S.idx === 0) S.round++;
+    showNextOverlay();
+  }
+
+  /* ── ゲーム終了 ── */
+  function confirmEnd() {
+    if (confirm('ゲームを終了して結果を見ますか？')) endGame();
+  }
+
+  function endGame() {
+    killTimers();
+    document.getElementById('next-overlay').classList.add('hidden');
+    renderResults();
+    showScreen('results-screen');
+  }
+
+  function renderResults() {
+    const sorted = S.players
+      .map((n, i) => ({ name: n, pts: S.scores[i] }))
+      .sort((a, b) => b.pts - a.pts);
+
+    const list = document.getElementById('rank-list');
+    list.innerHTML = '';
+    sorted.forEach((p, i) => {
+      const d = document.createElement('div');
+      d.className = `rank-item${i < 3 ? ` r${i+1}` : ''} anim-up`;
+      d.style.animationDelay = `${i * 0.07}s`;
+      d.innerHTML = `
+        <div class="rank-medal">${MEDALS[i] || `${i+1}`}</div>
+        <div class="rank-name">${p.name}</div>
+        <div>
+          <span class="rank-pts">${p.pts}</span>
+          <span class="rank-pts-label">点</span>
+        </div>`;
+      list.appendChild(d);
+    });
+  }
+
+  /* ── リセット ── */
+  function resetGame() {
+    killTimers();
+    S.idx = 0; S.round = 1;
+    showScreen('setup-screen');
+  }
+
+  /* ── ユーティリティ ── */
+  function killTimers() {
+    clearTimeout(S.waitTimer); S.waitTimer = null;
+    clearInterval(S.cdTimer);  S.cdTimer = null;
+  }
+
+  /* ── 初期化 ── */
+  setCount(4);
+</script>
+</body>
+</html>

@@ -619,6 +619,34 @@
     .anim-pop { animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
     .anim-up  { animation: fade-up 0.28s ease both; }
 
+    /* ── 全画面ボタン（固定・常時表示） ── */
+    .fs-btn {
+      position: fixed;
+      top: clamp(8px, 1.5vw, 14px);
+      right: clamp(10px, 2vw, 18px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: clamp(6px, 1.2vw, 10px) clamp(10px, 1.8vw, 16px);
+      border: 2.5px solid var(--dark);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.92);
+      color: var(--dark);
+      font-family: 'BIZ UDPGothic', sans-serif;
+      font-size: clamp(12px, 2vw, 16px);
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--dark);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      white-space: nowrap;
+    }
+    .fs-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+    .fs-btn .fs-icon { font-size: clamp(14px, 2.2vw, 18px); line-height: 1; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -688,6 +716,12 @@
 <div class="flash-overlay" id="flash-overlay">
   <div class="flash-bubble" id="flash-num"></div>
 </div>
+
+<!-- ══ 全画面ボタン（固定） ══ -->
+<button class="fs-btn" id="fs-btn" onclick="toggleFullscreen()">
+  <span class="fs-icon" id="fs-icon">⛶</span>
+  <span id="fs-label">全画面</span>
+</button>
 
 <script>
   const KANA = [
@@ -969,6 +1003,30 @@
   }
 
   setCount(4);
+
+  /* ── 全画面 ── */
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen
+        || document.documentElement.webkitRequestFullscreen
+        || document.documentElement.mozRequestFullScreen
+        || (() => {})).call(document.documentElement);
+    } else {
+      (document.exitFullscreen
+        || document.webkitExitFullscreen
+        || document.mozCancelFullScreen
+        || (() => {})).call(document);
+    }
+  }
+
+  function updateFsBtn() {
+    const isFs = !!document.fullscreenElement;
+    document.getElementById('fs-icon').textContent = isFs ? '✕' : '⛶';
+    document.getElementById('fs-label').textContent = isFs ? '戻す' : '全画面';
+  }
+
+  document.addEventListener('fullscreenchange', updateFsBtn);
+  document.addEventListener('webkitfullscreenchange', updateFsBtn);
 </script>
 </body>
 </html>

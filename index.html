@@ -661,40 +661,60 @@
       color: var(--mid);
     }
 
-    /* ── 文字ピッカー ── */
-    .picker-wrap {
-      margin-top: 16px;
+    /* ── 文字選択オーバーレイ ── */
+    .cp-box {
+      background: #fff;
+      border: 3px solid var(--dark);
+      border-radius: 14px;
+      box-shadow: 6px 6px 0 var(--dark);
+      padding: clamp(16px, 3vw, 28px);
+      width: min(96vw, 860px);
+      max-height: 92dvh;
+      max-height: 92vh;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: clamp(12px, 2vh, 18px);
     }
-    .picker-cols {
+    .cp-title {
+      font-family: 'BIZ UDPGothic', sans-serif;
+      font-weight: 700;
+      font-size: clamp(18px, 3.5vw, 26px);
+      text-align: center;
+    }
+    .cp-hint {
+      font-size: clamp(12px, 2vw, 15px);
+      color: var(--mid);
+      text-align: center;
+      margin-top: -6px;
+    }
+    .cp-cols {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px;
+      gap: clamp(12px, 2vw, 20px);
     }
-    .picker-section { display: flex; flex-direction: column; gap: 8px; }
-    .picker-top { display: flex; align-items: center; gap: 10px; }
+    .cp-section { display: flex; flex-direction: column; gap: 8px; }
+    .cp-top { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .picker-type-label {
-      font-size: clamp(12px, 2vw, 15px);
+      font-size: clamp(13px, 2.2vw, 17px);
       font-weight: 700;
       letter-spacing: 1px;
     }
     .picker-type-label.head { color: var(--orange); }
     .picker-type-label.tail { color: var(--red); }
     .picker-preview {
-      width: clamp(44px, 8vw, 56px);
-      height: clamp(44px, 8vw, 56px);
+      width: clamp(46px, 8vw, 60px);
+      height: clamp(46px, 8vw, 60px);
       border: 2.5px solid var(--dark);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: clamp(26px, 5vw, 36px);
+      font-size: clamp(28px, 5.5vw, 40px);
       line-height: 1;
       box-shadow: 2px 2px 0 var(--dark);
       flex-shrink: 0;
     }
-    .picker-preview.head { background: #FFF6DA; color: var(--orange); }
-    .picker-preview.tail { background: #FFE9E9; color: var(--red); }
+    .picker-preview.head  { background: #FFF6DA; color: var(--orange); }
+    .picker-preview.tail  { background: #FFE9E9; color: var(--red); }
     .picker-preview.empty { background: #F0EBE0; color: #ccc; }
 
     .kana-grid {
@@ -707,7 +727,7 @@
       border: 1.5px solid #ccc;
       border-radius: 6px;
       background: #fff;
-      font-size: clamp(13px, 2.6vmin, 19px);
+      font-size: clamp(13px, 2.6vmin, 20px);
       font-family: 'BIZ UDPGothic', sans-serif;
       cursor: pointer;
       transition: transform 0.1s;
@@ -728,23 +748,29 @@
       font-weight: 700;
       box-shadow: 2px 2px 0 var(--red);
     }
-
-    /* ゲーム画面：固定モード表示帯 */
-    .fixed-badge {
-      width: 100%;
-      background: #fff;
-      border: 2.5px solid var(--dark);
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: clamp(12px, 2vw, 15px);
-      color: var(--mid);
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+    .cp-confirm {
+      align-self: center;
+      padding: clamp(13px, 2.2vh, 18px) clamp(44px, 9vw, 72px);
+      border: 3px solid var(--dark);
+      border-radius: 10px;
+      background: var(--green);
+      color: #fff;
+      font-family: 'BIZ UDPGothic', sans-serif;
+      font-weight: 700;
+      font-size: clamp(18px, 3.5vw, 26px);
+      letter-spacing: 3px;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 var(--dark);
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .fixed-badge strong { color: var(--dark); font-size: clamp(14px, 2.5vw, 18px); }
+    .cp-confirm:disabled {
+      background: #bbb;
+      box-shadow: 4px 4px 0 #888;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .cp-confirm:not(:disabled):active { transform: translate(4px,4px); box-shadow: none; }
 
     /* ── 全画面ボタン（固定・常時表示） ── */
     .fs-btn {
@@ -794,30 +820,12 @@
           🎲 ランダム
           <small>毎回ちがう文字</small>
         </button>
-        <button class="mode-btn" onclick="selectMode('fixed')">
-          ✏️ 文字をきめる
-          <small>ずっと同じ文字</small>
+        <button class="mode-btn" onclick="selectMode('manual')">
+          ✏️ 毎回きめる
+          <small>ターンごとに選ぶ</small>
         </button>
       </div>
 
-      <div id="char-picker" class="picker-wrap hidden">
-        <div class="picker-cols">
-          <div class="picker-section">
-            <div class="picker-top">
-              <div class="picker-preview empty" id="head-preview">？</div>
-              <div class="picker-type-label head">あたまの文字</div>
-            </div>
-            <div class="kana-grid" id="head-grid"></div>
-          </div>
-          <div class="picker-section">
-            <div class="picker-top">
-              <div class="picker-preview empty" id="tail-preview">？</div>
-              <div class="picker-type-label tail">おしりの文字</div>
-            </div>
-            <div class="kana-grid" id="tail-grid"></div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="box">
@@ -850,7 +858,6 @@
     <button class="end-btn" onclick="confirmEnd()">ゲーム終了</button>
   </div>
   <div class="score-strip" id="score-strip"></div>
-  <div class="fixed-badge hidden" id="fixed-badge"></div>
   <div class="game-area">
     <div class="game-inner" id="game-area"></div>
   </div>
@@ -872,6 +879,31 @@
   <div class="ov-name" id="ov-name"></div>
   <div class="ov-sub">の番だよ！</div>
   <button class="ov-btn" onclick="beginTurn()">スタート！</button>
+</div>
+
+<!-- ══ 文字選択オーバーレイ（毎回きめるモード） ══ -->
+<div class="overlay hidden" id="char-pick-overlay">
+  <div class="cp-box">
+    <div class="cp-title">📝 もじをきめてください</div>
+    <div class="cp-hint">（プレイヤーには見せないでね 👀）</div>
+    <div class="cp-cols">
+      <div class="cp-section">
+        <div class="cp-top">
+          <div class="picker-preview empty" id="cp-head-preview">？</div>
+          <div class="picker-type-label head">あたまの文字</div>
+        </div>
+        <div class="kana-grid" id="cp-head-grid"></div>
+      </div>
+      <div class="cp-section">
+        <div class="cp-top">
+          <div class="picker-preview empty" id="cp-tail-preview">？</div>
+          <div class="picker-type-label tail">おしりの文字</div>
+        </div>
+        <div class="kana-grid" id="cp-tail-grid"></div>
+      </div>
+    </div>
+    <button class="cp-confirm" id="cp-confirm" onclick="confirmChars()" disabled>決定！</button>
+  </div>
 </div>
 
 <!-- ══ スコアフラッシュ ══ -->
@@ -908,31 +940,33 @@
     waitTimer: null, cdTimer: null, cdVal: 10
   };
   let playerCount = 4;
-  let gameMode = 'random';
-  let fixedHead = '';
-  let fixedTail = '';
+  let gameMode   = 'random';
+  let turnHead   = '';
+  let turnTail   = '';
 
-  /* ── モード選択 ── */
+  /* ── モード選択（セットアップ画面） ── */
   function selectMode(mode) {
     gameMode = mode;
     document.querySelectorAll('.mode-btn').forEach((b, i) => {
-      b.classList.toggle('active', (mode === 'random' && i === 0) || (mode === 'fixed' && i === 1));
+      b.classList.toggle('active',
+        (mode === 'random' && i === 0) || (mode === 'manual' && i === 1));
     });
-    const picker = document.getElementById('char-picker');
-    if (mode === 'fixed') {
-      picker.classList.remove('hidden');
-      renderKanaGrids();
-    } else {
-      picker.classList.add('hidden');
-    }
   }
 
-  function renderKanaGrids() {
-    renderKanaGrid('head-grid', 'head');
-    renderKanaGrid('tail-grid', 'tail');
+  /* ── 文字選択オーバーレイ（毎回きめるモード） ── */
+  function showCharPicker() {
+    turnHead = ''; turnTail = '';
+    renderCpGrid('cp-head-grid', 'head');
+    renderCpGrid('cp-tail-grid', 'tail');
+    const hp = document.getElementById('cp-head-preview');
+    const tp = document.getElementById('cp-tail-preview');
+    hp.textContent = '？'; hp.className = 'picker-preview empty';
+    tp.textContent = '？'; tp.className = 'picker-preview empty';
+    document.getElementById('cp-confirm').disabled = true;
+    document.getElementById('char-pick-overlay').classList.remove('hidden');
   }
 
-  function renderKanaGrid(id, type) {
+  function renderCpGrid(id, type) {
     const grid = document.getElementById(id);
     if (!grid) return;
     grid.innerHTML = '';
@@ -940,25 +974,34 @@
       const btn = document.createElement('button');
       btn.className = 'kana-btn';
       btn.textContent = char;
-      if (type === 'head' && char === fixedHead) btn.classList.add('sel-head');
-      if (type === 'tail' && char === fixedTail)  btn.classList.add('sel-tail');
-      btn.onclick = () => selectChar(type, char);
+      if (type === 'head' && char === turnHead) btn.classList.add('sel-head');
+      if (type === 'tail' && char === turnTail)  btn.classList.add('sel-tail');
+      btn.onclick = () => selectTurnChar(type, char);
       grid.appendChild(btn);
     });
   }
 
-  function selectChar(type, char) {
+  function selectTurnChar(type, char) {
     if (type === 'head') {
-      if (char === fixedTail) { alert('おしりと同じ文字は選べないよ！'); return; }
-      fixedHead = char;
+      if (char === turnTail) return;   // おしりと同じは選べない
+      turnHead = char;
     } else {
-      if (char === fixedHead) { alert('あたまと同じ文字は選べないよ！'); return; }
-      fixedTail = char;
+      if (char === turnHead) return;   // あたまと同じは選べない
+      turnTail = char;
     }
-    const prev = document.getElementById(type + '-preview');
+    const prev = document.getElementById('cp-' + type + '-preview');
     prev.textContent = char;
     prev.className = 'picker-preview ' + type;
-    renderKanaGrids();
+    renderCpGrid('cp-head-grid', 'head');
+    renderCpGrid('cp-tail-grid', 'tail');
+    document.getElementById('cp-confirm').disabled = !(turnHead && turnTail);
+  }
+
+  function confirmChars() {
+    S.head = turnHead;
+    S.tail = turnTail;
+    document.getElementById('char-pick-overlay').classList.add('hidden');
+    phaseHead();
   }
 
   function setCount(n) {
@@ -985,10 +1028,6 @@
   }
 
   function startGame() {
-    if (gameMode === 'fixed' && (!fixedHead || !fixedTail)) {
-      alert('あたまとおしりの文字を両方えらんでね！');
-      return;
-    }
     S.players = []; S.scores = [];
     for (let i = 0; i < playerCount; i++) {
       const el = document.getElementById(`pi${i}`);
@@ -996,14 +1035,6 @@
       S.scores.push(0);
     }
     S.idx = 0; S.round = 1;
-    // 固定モードバッジの表示切替
-    const badge = document.getElementById('fixed-badge');
-    if (gameMode === 'fixed') {
-      badge.innerHTML = `✏️ 固定モード：あたま <strong>${fixedHead}</strong> ／ おしり <strong>${fixedTail}</strong>`;
-      badge.classList.remove('hidden');
-    } else {
-      badge.classList.add('hidden');
-    }
     showScreen('game-screen');
     showNextOverlay();
   }
@@ -1033,16 +1064,15 @@
 
   function beginTurn() {
     document.getElementById('next-overlay').classList.add('hidden');
-    pickChars();
-    phaseHead();
+    if (gameMode === 'manual') {
+      showCharPicker();
+    } else {
+      pickChars();
+      phaseHead();
+    }
   }
 
   function pickChars() {
-    if (gameMode === 'fixed') {
-      S.head = fixedHead;
-      S.tail = fixedTail;
-      return;
-    }
     const h = Math.floor(Math.random() * KANA.length);
     let t;
     do { t = Math.floor(Math.random() * KANA.length); } while (t === h);

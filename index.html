@@ -5,75 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>あたまおしりゲーム</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --red:    #D63B2A;
-      --yellow: #F5C518;
-      --blue:   #1A56B8;
-      --green:  #2A9D4E;
-      --orange: #E87000;
+      --red:    #C13022;
+      --yellow: #F0B429;
+      --blue:   #1B4F8C;
+      --green:  #2D7A3C;
+      --orange: #C05500;
       --dark:   #1a1a1a;
-      --mid:    #666;
-      --paper:  #FBF7ED;
-      --white:  #FFFFFF;
+      --mid:    #5a5a5a;
+      --paper:  #F8F3E8;
+      --stripe: rgba(0,0,0,0.04);
     }
+
+    html, body { height: 100%; }
 
     body {
-      font-family: 'Kosugi Maru', 'Hiragino Maru Gothic ProN', sans-serif;
+      font-family: 'BIZ UDPGothic', 'UD デジタル教科書体 NK-R', 'Hiragino Kaku Gothic ProN', sans-serif;
       background: var(--paper);
       background-image:
-        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-      background-size: 28px 28px;
-      min-height: 100vh;
+        linear-gradient(var(--stripe) 1px, transparent 1px),
+        linear-gradient(90deg, var(--stripe) 1px, transparent 1px);
+      background-size: 32px 32px;
       color: var(--dark);
       -webkit-text-size-adjust: 100%;
+      overflow-x: hidden;
     }
 
+    /* ── 画面管理 ── */
     .screen { display: none; }
-    .screen.active { display: block; }
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      min-height: 100vh;
+    }
 
     /* ── 共通ヘッダー ── */
     .page-header {
       background: var(--red);
       border-bottom: 4px solid var(--dark);
-      padding: 14px 20px 12px;
+      padding: clamp(12px,2vh,18px) 20px clamp(10px,1.8vh,16px);
       text-align: center;
+      flex-shrink: 0;
     }
     .game-title {
-      font-size: clamp(26px, 8vw, 44px);
-      font-weight: 900;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(28px, 7vw, 54px);
       color: #fff;
       letter-spacing: 5px;
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+      line-height: 1.1;
     }
     .game-sub {
-      font-size: 12px;
+      font-size: clamp(11px, 1.8vw, 15px);
       color: rgba(255,255,255,0.85);
       letter-spacing: 3px;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
-    /* ── セットアップ画面 ── */
-    #setup-screen {
-      padding: 20px 16px 48px;
-      max-width: 540px;
-      margin: 0 auto;
+    /* ═══════════════════════════════
+       セットアップ画面
+    ═══════════════════════════════ */
+    #setup-screen { align-items: center; }
+
+    .setup-inner {
+      width: 100%;
+      max-width: 640px;
+      padding: clamp(16px,3vh,28px) 16px clamp(32px,5vh,56px);
+      flex: 1;
     }
 
     .box {
-      background: var(--white);
+      background: #fff;
       border: 3px solid var(--dark);
       border-radius: 10px;
       box-shadow: 4px 4px 0 var(--dark);
-      padding: 18px;
+      padding: clamp(14px,2.5vw,22px);
       margin-bottom: 14px;
     }
     .box-title {
-      font-size: 14px;
+      font-size: clamp(14px, 2.2vw, 18px);
       font-weight: bold;
       color: var(--mid);
       border-bottom: 2px dashed #ccc;
@@ -84,11 +99,12 @@
 
     .count-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .count-btn {
-      width: 46px; height: 46px;
+      width: clamp(48px, 9vw, 64px);
+      height: clamp(48px, 9vw, 64px);
       border: 2.5px solid var(--dark);
       border-radius: 8px;
-      background: var(--white);
-      font-size: 19px;
+      background: #fff;
+      font-size: clamp(18px, 3.5vw, 26px);
       font-weight: bold;
       font-family: inherit;
       cursor: pointer;
@@ -102,19 +118,22 @@
     .player-inputs { display: flex; flex-direction: column; gap: 10px; }
     .player-row { display: flex; align-items: center; gap: 10px; }
     .p-badge {
-      width: 32px; height: 32px; flex-shrink: 0;
+      width: clamp(36px, 6vw, 48px);
+      height: clamp(36px, 6vw, 48px);
+      flex-shrink: 0;
       border: 2.5px solid var(--dark);
       border-radius: 50%;
       background: var(--yellow);
-      font-size: 14px; font-weight: bold;
+      font-size: clamp(15px, 2.8vw, 20px);
+      font-weight: bold;
       display: flex; align-items: center; justify-content: center;
     }
     .p-input {
       flex: 1;
       border: 2.5px solid var(--dark);
       border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 16px;
+      padding: clamp(10px, 1.8vw, 14px) 14px;
+      font-size: clamp(17px, 2.8vw, 22px);
       font-family: inherit;
       background: #fff;
       outline: none;
@@ -126,14 +145,13 @@
     .start-btn {
       display: block;
       width: 100%;
-      padding: 18px;
+      padding: clamp(16px, 2.8vh, 24px);
       border: 3px solid var(--dark);
       border-radius: 10px;
       background: var(--red);
       color: #fff;
-      font-size: 21px;
-      font-family: inherit;
-      font-weight: bold;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(20px, 4vw, 30px);
       letter-spacing: 5px;
       cursor: pointer;
       box-shadow: 5px 5px 0 var(--dark);
@@ -142,25 +160,32 @@
     }
     .start-btn:active { transform: translate(5px,5px); box-shadow: none; }
 
-    /* ── ゲーム画面 ── */
-    #game-screen { max-width: 680px; margin: 0 auto; padding-bottom: 48px; }
+    /* ═══════════════════════════════
+       ゲーム画面
+    ═══════════════════════════════ */
+    #game-screen { width: 100%; }
 
     .game-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
+      padding: clamp(8px,1.5vw,13px) clamp(14px,2.5vw,24px);
       background: #fff;
       border-bottom: 3px solid var(--dark);
+      flex-shrink: 0;
     }
-    .round-label { font-size: 14px; font-weight: bold; color: var(--mid); }
+    .round-label {
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(15px, 2.5vw, 22px);
+      color: var(--mid);
+    }
     .end-btn {
-      padding: 7px 14px;
-      border: 2px solid var(--red);
+      padding: clamp(8px,1.2vw,12px) clamp(14px,2.2vw,22px);
+      border: 2.5px solid var(--red);
       border-radius: 6px;
       background: #fff;
       color: var(--red);
-      font-size: 13px;
+      font-size: clamp(13px, 2vw, 17px);
       font-family: inherit;
       font-weight: bold;
       cursor: pointer;
@@ -172,23 +197,25 @@
     /* スコアストリップ */
     .score-strip {
       display: flex;
-      gap: 8px;
-      padding: 10px 14px;
+      gap: clamp(6px, 1.5vw, 14px);
+      padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2vw, 20px);
       overflow-x: auto;
       background: #EDE8DB;
       border-bottom: 3px solid var(--dark);
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
     }
     .score-strip::-webkit-scrollbar { display: none; }
+
     .sc {
       flex-shrink: 0;
       background: #fff;
       border: 2px solid #bbb;
       border-radius: 8px;
-      padding: 5px 12px;
+      padding: clamp(5px, 1vw, 8px) clamp(10px, 2vw, 18px);
       text-align: center;
-      min-width: 62px;
+      min-width: clamp(66px, 12vw, 96px);
     }
     .sc.active-player {
       background: var(--yellow);
@@ -196,75 +223,111 @@
       box-shadow: 3px 3px 0 var(--dark);
     }
     .sc-name {
-      font-size: 11px;
+      font-size: clamp(11px, 1.8vw, 15px);
       color: var(--mid);
       white-space: nowrap;
-      max-width: 68px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .sc.active-player .sc-name { color: var(--dark); font-weight: bold; }
-    .sc-pts { font-size: 26px; font-weight: 900; color: var(--dark); line-height: 1.1; }
+    .sc-pts {
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(28px, 5vw, 44px);
+      color: var(--dark);
+      line-height: 1.1;
+    }
 
-    /* ゲームエリア */
-    .game-area { padding: 18px 14px; }
+    /* ゲームエリア（残り高さを全部使う） */
+    .game-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(14px, 3vh, 28px) clamp(12px, 2.5vw, 24px);
+      width: 100%;
+    }
+    .game-inner {
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(14px, 2.5vh, 24px);
+    }
 
     .player-banner {
+      width: 100%;
       background: var(--blue);
       border: 3px solid var(--dark);
       border-radius: 10px;
       box-shadow: 4px 4px 0 var(--dark);
-      padding: 12px 20px;
+      padding: clamp(10px, 1.8vh, 16px) 24px;
       text-align: center;
-      margin-bottom: 18px;
     }
-    .banner-label { font-size: 11px; color: rgba(255,255,255,0.8); letter-spacing: 2px; margin-bottom: 2px; }
-    .banner-name { font-size: clamp(22px, 6vw, 36px); color: #fff; font-weight: bold; }
+    .banner-label {
+      font-size: clamp(11px, 1.8vw, 15px);
+      color: rgba(255,255,255,0.8);
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+    .banner-name {
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(26px, 5.5vw, 48px);
+      color: #fff;
+      line-height: 1.2;
+    }
 
-    /* 文字カード */
+    /* 文字カード：vmin で縦横比固定のレスポンシブ */
     .chars-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      margin-bottom: 18px;
+      gap: clamp(16px, 4vw, 40px);
     }
     .char-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: clamp(108px, 26vw, 145px);
-      height: clamp(108px, 26vw, 145px);
+      width: clamp(124px, 23vmin, 230px);
+      height: clamp(124px, 23vmin, 230px);
       border: 3px solid var(--dark);
-      border-radius: 10px;
+      border-radius: 14px;
     }
-    .char-card.head-card { background: #FFF6DA; box-shadow: 4px 4px 0 var(--dark); }
-    .char-card.tail-card { background: #FFE9E9; box-shadow: 4px 4px 0 var(--dark); }
+    .char-card.head-card { background: #FFF6DA; box-shadow: 5px 5px 0 var(--dark); }
+    .char-card.tail-card { background: #FFE9E9; box-shadow: 5px 5px 0 var(--dark); }
     .char-card.waiting-card { background: #F0EBE0; border-style: dashed; }
 
-    .card-label { font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 3px; }
+    .card-label {
+      font-size: clamp(11px, 2vmin, 16px);
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
     .head-card .card-label { color: var(--orange); }
     .tail-card .card-label { color: var(--red); }
     .waiting-card .card-label { color: #bbb; }
 
-    .card-char { font-size: clamp(50px, 12vw, 70px); line-height: 1; }
+    .card-char {
+      font-size: clamp(54px, 11.5vmin, 115px);
+      line-height: 1;
+    }
     .head-card .card-char { color: var(--orange); }
     .tail-card .card-char { color: var(--red); }
     .waiting-card .card-char { color: #ccc; }
 
-    .char-arrow { font-size: 28px; color: #bbb; }
+    .char-arrow { font-size: clamp(26px, 5vw, 44px); color: #bbb; }
 
     /* 待機ヒント */
     .wait-hint {
       text-align: center;
-      font-size: 15px;
+      font-size: clamp(14px, 2.5vw, 20px);
       color: var(--mid);
-      padding: 8px;
     }
-    .dots { display: inline-flex; gap: 5px; vertical-align: middle; margin-left: 4px; }
+    .dots { display: inline-flex; gap: 5px; vertical-align: middle; margin-left: 6px; }
     .dots span {
-      width: 7px; height: 7px; border-radius: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
       background: currentColor;
       animation: dot-bounce 1.2s infinite;
     }
@@ -277,14 +340,18 @@
       border: 3px solid var(--dark);
       border-radius: 10px;
       box-shadow: 4px 4px 0 var(--dark);
-      padding: 20px;
+      padding: clamp(16px, 3vw, 26px);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: clamp(12px, 2vh, 20px);
     }
-    .timer-ring { position: relative; width: 116px; height: 116px; }
-    .timer-svg { width: 116px; height: 116px; transform: rotate(-90deg); }
+    .timer-ring {
+      position: relative;
+      width: clamp(100px, 18vmin, 158px);
+      height: clamp(100px, 18vmin, 158px);
+    }
+    .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
     .ring-bg { fill: none; stroke: #eee; stroke-width: 9; }
     .ring-fg {
       fill: none; stroke-width: 9; stroke-linecap: round;
@@ -293,15 +360,17 @@
     .timer-num {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 48px; font-weight: 900; line-height: 1;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(40px, 8vmin, 78px);
+      line-height: 1;
     }
     .early-btn {
-      padding: 11px 26px;
+      padding: clamp(10px, 1.8vh, 15px) clamp(24px, 4vw, 40px);
       border: 3px solid var(--dark);
       border-radius: 8px;
       background: var(--green);
       color: #fff;
-      font-size: 15px;
+      font-size: clamp(14px, 2.5vw, 20px);
       font-family: inherit;
       font-weight: bold;
       cursor: pointer;
@@ -312,47 +381,58 @@
     .early-btn:active { transform: translate(3px,3px); box-shadow: none; }
 
     /* 採点フェーズ */
-    .score-phase { display: flex; flex-direction: column; gap: 14px; }
-
+    .score-phase {
+      width: 100%;
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: clamp(12px, 2.2vh, 20px);
+    }
     .score-q-box {
+      width: 100%;
       background: #fff;
       border: 3px solid var(--dark);
       border-radius: 10px;
       box-shadow: 4px 4px 0 var(--dark);
-      padding: 14px;
+      padding: clamp(12px, 2vw, 18px);
       text-align: center;
     }
-    .score-q-sub { font-size: 12px; color: var(--mid); margin-bottom: 3px; }
-    .score-q-name { font-size: clamp(20px, 5vw, 30px); font-weight: bold; color: var(--blue); }
-    .score-q-ask { font-size: 13px; color: var(--mid); margin-top: 3px; }
+    .score-q-sub { font-size: clamp(12px, 2vw, 16px); color: var(--mid); margin-bottom: 3px; }
+    .score-q-name {
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(24px, 5vw, 40px);
+      color: var(--blue);
+    }
+    .score-q-ask { font-size: clamp(13px, 2.2vw, 18px); color: var(--mid); margin-top: 3px; }
 
-    .mini-chars { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .mini-chars { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 2vw, 18px); }
     .mini-card {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 78px; height: 78px;
+      width: clamp(72px, 12vmin, 108px);
+      height: clamp(72px, 12vmin, 108px);
       border: 2.5px solid var(--dark);
       border-radius: 8px;
     }
     .mini-card.head-card { background: #FFF6DA; }
     .mini-card.tail-card { background: #FFE9E9; }
-    .mini-label { font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+    .mini-label { font-size: clamp(9px, 1.5vmin, 13px); font-weight: bold; letter-spacing: 1px; }
     .mini-card.head-card .mini-label { color: var(--orange); }
     .mini-card.tail-card .mini-label { color: var(--red); }
-    .mini-char { font-size: 32px; line-height: 1; }
+    .mini-char { font-size: clamp(28px, 6vmin, 50px); line-height: 1; }
     .mini-card.head-card .mini-char { color: var(--orange); }
     .mini-card.tail-card .mini-char { color: var(--red); }
-    .mini-arrow { font-size: 22px; color: #bbb; }
+    .mini-arrow { font-size: clamp(20px, 4vw, 34px); color: #bbb; }
 
     .score-btns {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: clamp(8px, 1.5vw, 16px);
+      width: 100%;
     }
     .s-btn {
-      height: 70px;
+      height: clamp(68px, 12vh, 96px);
       border: 2.5px solid var(--dark);
       border-radius: 8px;
-      font-size: 16px;
+      font-size: clamp(16px, 3vw, 24px);
       font-family: inherit;
       font-weight: bold;
       cursor: pointer;
@@ -363,31 +443,31 @@
       transition: transform 0.1s, box-shadow 0.1s;
     }
     .s-btn:active { transform: translate(3px,3px); box-shadow: none; }
-    .s-btn small { font-size: 11px; font-weight: normal; opacity: 0.75; }
+    .s-btn small { font-size: clamp(10px, 1.8vw, 14px); font-weight: normal; opacity: 0.75; }
     .s-btn.pass { background: #F0EBE0; color: var(--mid); }
-    .s-btn.p1 { background: #D4EDDA; color: #155724; }
-    .s-btn.p2 { background: #CCE5FF; color: #004085; }
+    .s-btn.p1 { background: #D4EDDA; color: #1a5c2e; }
+    .s-btn.p2 { background: #CCE5FF; color: #0d3a6e; }
     .s-btn.p3 { background: var(--yellow); color: #333; }
 
-    .custom-row { display: flex; gap: 8px; }
+    .custom-row { display: flex; gap: 8px; width: 100%; }
     .custom-input {
       flex: 1;
       border: 2.5px solid var(--dark);
       border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 19px;
+      padding: clamp(10px, 1.8vw, 14px) 12px;
+      font-size: clamp(18px, 3.5vw, 28px);
       font-family: inherit;
       text-align: center;
       outline: none;
       background: #fff;
     }
     .custom-go {
-      padding: 10px 16px;
+      padding: clamp(10px, 1.8vw, 14px) clamp(14px, 2.5vw, 24px);
       border: 2.5px solid var(--dark);
       border-radius: 8px;
       background: var(--blue);
       color: #fff;
-      font-size: 14px;
+      font-size: clamp(13px, 2.2vw, 18px);
       font-family: inherit;
       font-weight: bold;
       cursor: pointer;
@@ -398,37 +478,38 @@
     }
     .custom-go:active { transform: translate(3px,3px); box-shadow: none; }
 
-    /* ── 次のプレイヤーオーバーレイ ── */
+    /* ═══════════════════════════════
+       次プレイヤーオーバーレイ
+    ═══════════════════════════════ */
     .overlay {
       position: fixed; inset: 0;
-      background: rgba(251,247,237,0.96);
+      background: rgba(248,243,232,0.97);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 14px;
+      gap: clamp(12px, 2.5vh, 22px);
       z-index: 200;
     }
     .overlay.hidden { display: none; }
-    .ov-icon { font-size: 60px; }
-    .ov-label { font-size: 14px; color: var(--mid); letter-spacing: 3px; }
+    .ov-icon { font-size: clamp(52px, 11vmin, 80px); }
+    .ov-label { font-size: clamp(13px, 2.5vw, 18px); color: var(--mid); letter-spacing: 3px; }
     .ov-name {
-      font-size: clamp(30px, 8vw, 50px);
-      font-weight: bold;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(34px, 8vw, 64px);
       color: var(--blue);
       text-align: center;
-      padding: 0 24px 8px;
-      border-bottom: 4px solid var(--blue);
+      padding: 0 24px clamp(8px,1.5vh,14px);
+      border-bottom: 5px solid var(--blue);
     }
-    .ov-sub { font-size: 17px; color: var(--mid); }
+    .ov-sub { font-size: clamp(16px, 3vw, 24px); color: var(--mid); }
     .ov-btn {
-      margin-top: 10px;
-      padding: 17px 46px;
+      margin-top: clamp(6px,1.5vh,12px);
+      padding: clamp(15px,2.5vh,22px) clamp(44px,9vw,72px);
       border: 3px solid var(--dark);
       border-radius: 10px;
       background: var(--red);
       color: #fff;
-      font-size: 21px;
-      font-family: inherit;
-      font-weight: bold;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(20px, 4.5vw, 34px);
       letter-spacing: 4px;
       cursor: pointer;
       box-shadow: 5px 5px 0 var(--dark);
@@ -447,58 +528,71 @@
       transition: opacity 0.15s;
     }
     .flash-overlay.show { opacity: 1; }
-    .flash-overlay.show.pass-flash { background: rgba(100,100,100,0.3); }
-    .flash-overlay.show.score-flash { background: rgba(42,157,78,0.2); }
+    .flash-overlay.show.pass-flash { background: rgba(90,90,90,0.3); }
+    .flash-overlay.show.score-flash { background: rgba(45,122,60,0.2); }
     .flash-bubble {
       background: #fff;
       border: 4px solid var(--dark);
       border-radius: 16px;
       box-shadow: 6px 6px 0 var(--dark);
-      padding: 18px 44px;
-      font-size: 76px;
-      font-weight: 900;
+      padding: clamp(16px,3vw,26px) clamp(40px,8vw,70px);
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(68px, 15vmin, 120px);
       line-height: 1;
     }
 
-    /* ── 結果画面 ── */
-    #results-screen { max-width: 560px; margin: 0 auto; padding: 0 16px 52px; }
+    /* ═══════════════════════════════
+       結果画面
+    ═══════════════════════════════ */
+    #results-screen { align-items: center; }
+
     .results-header {
       background: var(--yellow);
       border-bottom: 4px solid var(--dark);
-      padding: 18px;
+      padding: clamp(16px,3vw,24px);
       text-align: center;
-      font-size: clamp(22px, 6vw, 34px);
-      font-weight: bold;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(24px, 5.5vw, 40px);
       letter-spacing: 3px;
+      width: 100%;
+      flex-shrink: 0;
     }
-
-    .rank-list { display: flex; flex-direction: column; gap: 10px; margin: 18px 0; }
+    .results-inner {
+      width: 100%;
+      max-width: 680px;
+      padding: 0 16px clamp(40px,6vh,60px);
+      flex: 1;
+    }
+    .rank-list { display: flex; flex-direction: column; gap: clamp(10px,1.5vh,14px); margin: clamp(16px,2.5vh,22px) 0; }
     .rank-item {
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: center; gap: clamp(12px,2vw,18px);
       background: #fff;
       border: 3px solid var(--dark);
       border-radius: 10px;
-      padding: 13px 16px;
+      padding: clamp(12px,2vw,18px) clamp(14px,2.5vw,22px);
       box-shadow: 4px 4px 0 var(--dark);
     }
     .rank-item.r1 { background: #FFF8D0; }
     .rank-item.r2 { background: #F5F5F5; }
     .rank-item.r3 { background: #FFF0E5; }
-    .rank-medal { font-size: 28px; width: 34px; text-align: center; flex-shrink: 0; }
-    .rank-name { flex: 1; font-size: 19px; font-weight: bold; }
-    .rank-pts { font-size: 28px; font-weight: 900; color: var(--red); }
-    .rank-pts-label { font-size: 13px; color: var(--mid); }
+    .rank-medal { font-size: clamp(26px, 5vw, 38px); width: 38px; text-align: center; flex-shrink: 0; }
+    .rank-name { flex: 1; font-size: clamp(18px, 3.5vw, 26px); font-weight: bold; }
+    .rank-pts {
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(28px, 5.5vw, 42px);
+      color: var(--red);
+    }
+    .rank-pts-label { font-size: clamp(12px, 2vw, 16px); color: var(--mid); }
 
     .replay-btn {
       width: 100%;
-      padding: 17px;
+      padding: clamp(15px,2.5vh,22px);
       border: 3px solid var(--dark);
       border-radius: 10px;
       background: var(--blue);
       color: #fff;
-      font-size: 19px;
-      font-family: inherit;
-      font-weight: bold;
+      font-family: 'Dela Gothic One', sans-serif;
+      font-size: clamp(18px, 3.5vw, 28px);
       letter-spacing: 4px;
       cursor: pointer;
       box-shadow: 5px 5px 0 var(--dark);
@@ -507,7 +601,7 @@
     }
     .replay-btn:active { transform: translate(5px,5px); box-shadow: none; }
 
-    /* アニメーション */
+    /* ── アニメーション ── */
     @keyframes pop-in {
       0%   { transform: scale(0.5); opacity: 0; }
       70%  { transform: scale(1.08); opacity: 1; }
@@ -536,9 +630,7 @@
     <div class="game-title">あたまおしり</div>
     <div class="game-sub">ことばゲーム 🎯</div>
   </div>
-
-  <div style="padding: 18px 16px 40px; max-width: 540px; margin: 0 auto;">
-
+  <div class="setup-inner">
     <div class="box">
       <div class="box-title">👥 プレイヤー数を選んでね</div>
       <div class="count-row" id="count-row">
@@ -551,12 +643,10 @@
         <button class="count-btn" onclick="setCount(8)">8</button>
       </div>
     </div>
-
     <div class="box">
       <div class="box-title">✏️ なまえを入力してね</div>
       <div class="player-inputs" id="player-inputs"></div>
     </div>
-
     <button class="start-btn" onclick="startGame()">ゲームスタート！</button>
   </div>
 </div>
@@ -564,20 +654,22 @@
 <!-- ══ ゲーム ══ -->
 <div id="game-screen" class="screen">
   <div class="page-header">
-    <div class="game-title" style="font-size: clamp(18px,5vw,28px); letter-spacing:3px;">あたまおしりゲーム</div>
+    <div class="game-title" style="font-size:clamp(20px,4.5vw,32px);letter-spacing:3px;">あたまおしりゲーム</div>
   </div>
   <div class="game-topbar">
     <div class="round-label" id="round-label">ラウンド 1</div>
     <button class="end-btn" onclick="confirmEnd()">ゲーム終了</button>
   </div>
   <div class="score-strip" id="score-strip"></div>
-  <div class="game-area" id="game-area"></div>
+  <div class="game-area">
+    <div class="game-inner" id="game-area"></div>
+  </div>
 </div>
 
 <!-- ══ 結果 ══ -->
 <div id="results-screen" class="screen">
   <div class="results-header">🎉 ゲーム結果！</div>
-  <div style="padding: 0 0 0 0;">
+  <div class="results-inner">
     <div class="rank-list" id="rank-list"></div>
     <button class="replay-btn" onclick="resetGame()">もう一度あそぶ</button>
   </div>
@@ -619,10 +711,8 @@
     head: '', tail: '',
     waitTimer: null, cdTimer: null, cdVal: 10
   };
-
   let playerCount = 4;
 
-  /* ── セットアップ ── */
   function setCount(n) {
     playerCount = n;
     document.querySelectorAll('.count-btn').forEach((b, i) => {
@@ -658,13 +748,11 @@
     showNextOverlay();
   }
 
-  /* ── 画面切替 ── */
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
-  /* ── スコアボード ── */
   function renderScoreboard() {
     const strip = document.getElementById('score-strip');
     strip.innerHTML = '';
@@ -677,7 +765,6 @@
     document.getElementById('round-label').textContent = `ラウンド ${S.round}`;
   }
 
-  /* ── 次プレイヤーオーバーレイ ── */
   function showNextOverlay() {
     renderScoreboard();
     document.getElementById('ov-name').textContent = S.players[S.idx];
@@ -690,7 +777,6 @@
     phaseHead();
   }
 
-  /* ── 文字選択 ── */
   function pickChars() {
     const h = Math.floor(Math.random() * KANA.length);
     let t;
@@ -698,7 +784,6 @@
     S.head = KANA[h]; S.tail = KANA[t];
   }
 
-  /* ── スロット演出 ── */
   function slotSpin(el, finalChar, cb) {
     let n = 0; const max = 9;
     const iv = setInterval(() => {
@@ -708,7 +793,6 @@
     }, 65);
   }
 
-  /* ── フェーズ：あたま表示 ── */
   function phaseHead() {
     killTimers();
     const area = document.getElementById('game-area');
@@ -737,11 +821,9 @@
       const el = document.getElementById('head-char');
       if (el) slotSpin(el, S.head, null);
     });
-
     S.waitTimer = setTimeout(phaseTail, 3000);
   }
 
-  /* ── フェーズ：おしり表示 ── */
   function phaseTail() {
     const tailCard = document.getElementById('tail-card');
     if (!tailCard) return;
@@ -753,7 +835,6 @@
     });
   }
 
-  /* ── カウントダウン ── */
   function startCountdown() {
     S.cdVal = 10;
     const hint = document.getElementById('hint-area');
@@ -764,11 +845,11 @@
             <svg class="timer-svg" viewBox="0 0 110 110">
               <circle class="ring-bg" cx="55" cy="55" r="50"/>
               <circle class="ring-fg" id="ring-fg" cx="55" cy="55" r="50"
-                stroke="#2A9D4E"
+                stroke="#2D7A3C"
                 stroke-dasharray="${CIRC}"
                 stroke-dashoffset="0"/>
             </svg>
-            <div class="timer-num" id="cd-num" style="color:#2A9D4E">10</div>
+            <div class="timer-num" id="cd-num" style="color:#2D7A3C">10</div>
           </div>
           <button class="early-btn" onclick="phaseScore()">採点する ⚡</button>
         </div>`;
@@ -780,11 +861,10 @@
       const ringEl = document.getElementById('ring-fg');
       if (!numEl) { killTimers(); return; }
 
-      const offset = CIRC * (1 - S.cdVal / 10);
-      ringEl.style.strokeDashoffset = offset;
+      ringEl.style.strokeDashoffset = CIRC * (1 - S.cdVal / 10);
       numEl.textContent = S.cdVal;
 
-      const col = S.cdVal > 6 ? '#2A9D4E' : S.cdVal > 3 ? '#E87000' : '#D63B2A';
+      const col = S.cdVal > 6 ? '#2D7A3C' : S.cdVal > 3 ? '#C05500' : '#C13022';
       ringEl.style.stroke = col;
       numEl.style.color = col;
 
@@ -792,7 +872,6 @@
     }, 1000);
   }
 
-  /* ── フェーズ：採点 ── */
   function phaseScore() {
     killTimers();
     const area = document.getElementById('game-area');
@@ -827,11 +906,7 @@
       </div>`;
   }
 
-  /* ── 採点処理 ── */
-  function giveScore(pts) {
-    S.scores[S.idx] += pts;
-    flashScore(pts);
-  }
+  function giveScore(pts) { S.scores[S.idx] += pts; flashScore(pts); }
 
   function giveCustom() {
     const v = parseInt(document.getElementById('custom-val').value) || 0;
@@ -842,22 +917,17 @@
   function flashScore(pts) {
     const fo = document.getElementById('flash-overlay');
     const fn = document.getElementById('flash-num');
-    fn.textContent = pts === 0 ? 'パス' : (pts > 0 ? `+${pts}` : pts);
+    fn.textContent = pts === 0 ? 'パス' : (pts > 0 ? `+${pts}` : `${pts}`);
     fo.className = 'flash-overlay show ' + (pts === 0 ? 'pass-flash' : 'score-flash');
-    setTimeout(() => {
-      fo.className = 'flash-overlay';
-      nextPlayer();
-    }, 650);
+    setTimeout(() => { fo.className = 'flash-overlay'; nextPlayer(); }, 650);
   }
 
-  /* ── 次のプレイヤー ── */
   function nextPlayer() {
     S.idx = (S.idx + 1) % S.players.length;
     if (S.idx === 0) S.round++;
     showNextOverlay();
   }
 
-  /* ── ゲーム終了 ── */
   function confirmEnd() {
     if (confirm('ゲームを終了して結果を見ますか？')) endGame();
   }
@@ -873,7 +943,6 @@
     const sorted = S.players
       .map((n, i) => ({ name: n, pts: S.scores[i] }))
       .sort((a, b) => b.pts - a.pts);
-
     const list = document.getElementById('rank-list');
     list.innerHTML = '';
     sorted.forEach((p, i) => {
@@ -883,28 +952,22 @@
       d.innerHTML = `
         <div class="rank-medal">${MEDALS[i] || `${i+1}`}</div>
         <div class="rank-name">${p.name}</div>
-        <div>
-          <span class="rank-pts">${p.pts}</span>
-          <span class="rank-pts-label">点</span>
-        </div>`;
+        <div><span class="rank-pts">${p.pts}</span><span class="rank-pts-label">点</span></div>`;
       list.appendChild(d);
     });
   }
 
-  /* ── リセット ── */
   function resetGame() {
     killTimers();
     S.idx = 0; S.round = 1;
     showScreen('setup-screen');
   }
 
-  /* ── ユーティリティ ── */
   function killTimers() {
     clearTimeout(S.waitTimer); S.waitTimer = null;
     clearInterval(S.cdTimer);  S.cdTimer = null;
   }
 
-  /* ── 初期化 ── */
   setCount(4);
 </script>
 </body>
